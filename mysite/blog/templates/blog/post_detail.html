@@ -1,0 +1,55 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+    <h1 class="posttitle loader">{{ post.title }}</h1>
+    {% if post.published_date %}
+        <div class="date postdate">
+            {{ post.published_date }}
+        </div>
+        {% else %}
+            <a class="btn btn-default" href="{% url 'post_publish' pk=post.pk %}">Publish</a> <!-- use of post_publish function from views.py -->
+    {% endif %}
+
+    <!-- safe will make our title in bolds and linebreaksbr will make our title have br after it -->
+    <p class="postcontent">{{ post.text|safe|linebreaksbr }}</p>
+
+    {% if user.is_authenticated %}
+        <a class="btn btn-primary" href="{% url 'post_edit' pk=post.pk %}"> <!-- use of PostUpdateView class from views.py -->
+        <!--  # for glyphicon, use span tag-->
+            <span class="glyphicon glyphicon-pencil"></span>
+        </a>
+        <a class="btn btn-primary" href="{% url 'post_remove' pk=post.pk %}"> <!-- use of PostDeleteView class from views.py -->
+        <!-- # for glyphicon, use span tag-->
+            <span class="glyphicon glyphicon-remove"></span>
+        </a>
+
+    {% endif %}
+
+    <hr>
+    <a class="btn btn-primary" href="{% url 'add_comment_to_post' pk=post.pk %}">Add comments</a> <!-- use of add_comment_to_post function from views.py -->
+    <div class="container">
+        <!--  comments that belong to that/the post -->
+        {% for comment in post.comments.all %}
+        <br>
+            {% if user.is_authenticated or comment.approved_comment %}
+                {{ comment.created_date }}
+                {% if not comment.approved_comment %}
+                    <a class="btn btn-default" href="{% url 'comment_remove' pk=comment.pk %}"> <!-- use of comment_remove function from views.py -->
+                    <!--  # for glyphicon, use span tag-->
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </a>
+                    <a class="btn btn-primary" href="{% url 'comment_approve' pk=comment.pk %}"> <!-- use of comment_approve function from views.py -->
+                    <!-- # for glyphicon, use span tag-->
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </a>
+                {% endif %}
+                    <p>{{ comment.text|safe|linebreaks }}</p>
+                    <p>Posted by: {{ comment.author }}</p>
+            {% endif %}
+                <!-- easy tag for checking if the -->
+                {% empty %}
+                    <p>No Comments !</p>
+        {% endfor %}
+    </div>
+
+{% endblock %}
